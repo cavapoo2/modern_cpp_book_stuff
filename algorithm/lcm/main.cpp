@@ -7,6 +7,8 @@ int main(int argc, char*argv[]) {
 
 	cout << res << endl;
 
+	cout << std::lcm(20,40) << endl; //here's the constexpr version as well
+
 	return 0;
 
 }
