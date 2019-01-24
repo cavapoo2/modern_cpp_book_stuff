@@ -2,7 +2,7 @@
 #include<string>
 #include<algorithm>
 #include<iostream>
-
+namespace Utility {
 std::string toBinString(unsigned long long in ) {
     std::string res="";
     int count=0;
@@ -23,4 +23,5 @@ std::string toBinString(unsigned long long in ) {
     std::reverse(res.begin(),res.end());
     //std::cout << "num 1s=" << count << std::endl;
     return res; 
+}
 }
