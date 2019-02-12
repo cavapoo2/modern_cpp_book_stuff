@@ -25,22 +25,22 @@ struct List {
   List() = delete;
   List(Node<T>* n):root(n)
   {
-    cout <<"List(Node)" << endl;
-   // copy(n);
-    cout <<"List(Node) done!" << endl;
+    //   cout <<"List(Node)" << endl;
+    // copy(n);
+    // cout <<"List(Node) done!" << endl;
   }
   List<T>& operator=(const List<T>& other){
     if(this == &other) return *this;
-    cout << "using op = " << endl;
+    //  cout << "using op = " << endl;
     removeElements();
-    cout << "using op = remove old" << endl;
+    //  cout << "using op = remove old" << endl;
     copy(other.get());
-    cout << "using op = copied new" << endl;
+    //  cout << "using op = copied new" << endl;
     //delete old element
     return *this;
   }
   List<T>(const List<T>& other) {
-    cout << "using copy constr" << endl;
+    // cout << "using copy constr" << endl;
     copy(other.get());
   }
   Node<T>* get()const {
@@ -57,7 +57,7 @@ struct List {
   }
 
   ~List(){
-    cout << "in ~List" << endl;
+    // cout << "in ~List" << endl;
     while(root != nullptr){
       Node<T>* nxt = root->next;
       delete root;
@@ -66,25 +66,25 @@ struct List {
   }
   private:
   void removeElements() {
-    cout << "remove Elements" << endl;
+    //cout << "remove Elements" << endl;
     show(root);
     while(root != nullptr){
       Node<T>* nxt = root->next;
       delete root;
       root = nxt;
     }
-    cout << "remove Elements done!" << endl;
+    // cout << "remove Elements done!" << endl;
   }
   void copy(Node<T>* in) {
-    cout << "deep copy Elements" << endl;
+    //cout << "deep copy Elements" << endl;
     Node<T>* start = nullptr;
     Node<T>* cur = nullptr;
-   // show(in);
+    // show(in);
     while(in != nullptr)
     {
       Node<T>* n = new Node<T>;
       n->data = in->data;
-    //  cout << n->data << ",.";
+      //  cout << n->data << ",.";
       n->next = nullptr;
       if(start == nullptr){
         start = cur =  n;
@@ -94,10 +94,10 @@ struct List {
       }
       in = in->next;
     }
-    cout << endl;
+    //cout << endl;
     root = start;
- //   show(root);
-    cout << "deep copy Elements done!" << endl;
+    //   show(root);
+    //  cout << "deep copy Elements done!" << endl;
   }
   Node<T>* root;
 };
@@ -236,11 +236,6 @@ List<int> sumInts(const List<int> &a, const List<int>& b){
   return List<int>(res);
 
 }
-struct Sum {
-  int data;
-  int carry;
-
-};
 template<typename T>
 int getLength(const Node<T>* n){
   int count=0;
@@ -272,47 +267,76 @@ Node<int>* padZeros(Node<int>* in, int n){
 }
 
 List<int> padListZeros(const List<int>& in, int n){
-  cout << "in padListZeros" << endl;
+  //  cout << "in padListZeros" << endl;
   if (n == 0) return in;
   Node<int>* res = padZeros(in.get(),n);
-  cout<<"pad"<<endl;
+  // cout<<"pad"<<endl;
   show(in);
   show(res);
   return List<int>(res);
 
 }
+struct Sum {
+  int data;
+  int carry;
 
+};
 /*sum Ints, this assumes that they ordered with msb first. eg the number
  * 123 is ordered 1->2->3 in the list */
+Node<int>* sumIntsRevHelper(Node<int>* a, Node<int> * b, Sum& sum) {
+  if(a == nullptr || b == nullptr) return nullptr;
+  cout << "in:" << a->data << "," << b->data << "," << sum.carry << endl;
+  Node<int>*n = sumIntsRevHelper(a->next,b->next,sum);
+  if (n != nullptr){
+    cout << "out1:" << n->data << "," << sum.carry  << endl;
+  }
+  int sumi = a->data + b->data + sum.carry;
+  int rem = sumi % 10;
+  int nc = (sumi >= 10) ? 1 : 0;
+  Node<int>* nxt = new Node<int>;
+  nxt->data = rem;
+  nxt->next = n;
+  sum.carry = nc;
+  cout << "out2:" << nxt->data << "," << sum.carry  << endl;
+  return  nxt;
+
+}
 
 List<int> sumIntsRev(const List<int>& la, const List<int>& lb) {
   if(la.len() == 0 && lb.len() == 0) return List<int>(la.get());
   int lena = la.len();
   int lenb = lb.len();
   List<int> temp(nullptr);
+  List<int> fin(nullptr);
+  Sum s = {0,0};
+  Node<int>* res = nullptr;
   if(lena != lenb){
     if(lena > lenb){
       int diff = lena - lenb;
-      cout << "len a > lenb " << diff << endl;
-      show(lb);
-      //List<int> ab = padListZeros(lb,diff);
       temp = padListZeros(lb,diff);
-      cout << "ret padListZeros" << endl;
-      //show(ab);
-      show(temp);
+      res = sumIntsRevHelper(la.get(),temp.get(),s);
     }
     else
     {
       int diff =  lenb - lena;
-      cout << "lenb  > lena " << diff << endl;
-      show(la);
-      //List<int> ba = padListZeros(la,diff);
       temp = padListZeros(la,diff);
-      show(temp);
+      res = sumIntsRevHelper(temp.get(),lb.get(),s);
     }
   }
-  cout<< "ret from sumIntsrev" << endl;
-  //show(temp);
+  else
+  {
+    res = sumIntsRevHelper(la.get(),lb.get(),s);
+  }
+  if(s.carry != 0) {
+    //need to add a another node.
+    Node<int>* n = new Node<int>;
+    n->next = res;
+    n->data = s.carry;
+    fin =  List<int>(n);
+  }else {
+    fin = List<int>(res);
+  }
+  show(fin);
   return temp;
 
 }
@@ -346,18 +370,18 @@ List<int> genIntList(int length){
 int main(int arg, char* argv[])
 {
   /*
-  List<int> lst = genIntList(3);
-  List<int> lst2 = genIntList(3);
-  List<int> res = sumInts(lst,lst2);
-  show(lst);
-  show(lst2);
-  show(res);
+     List<int> lst = genIntList(3);
+     List<int> lst2 = genIntList(3);
+     List<int> res = sumInts(lst,lst2);
+     show(lst);
+     show(lst2);
+     show(res);
 
-  List<int> rev = reverse(res);
-  show(rev);
+     List<int> rev = reverse(res);
+     show(rev);
 
-  List<int> resr = sumIntsRecur(lst,lst2);
-  show(resr);
+     List<int> resr = sumIntsRecur(lst,lst2);
+     show(resr);
   //pad list
   List<int> pad = genIntList(5);
   List<int> padr = padListZeros(pad,5);
@@ -366,22 +390,14 @@ int main(int arg, char* argv[])
   cout<<"padr"<<endl;
   show(padr);
   */
-  /*
-  List<int> rtest1 = genIntList(6);
-  List<int> rtest2 = genIntList(4);
+
+  List<int> rtest1 = genIntList(3);
+  List<int> rtest2 = genIntList(3);
   show(rtest1);
   show(rtest2);
   cout << "sumIntsRev test " << endl;
   List<int> rrtest = sumIntsRev(rtest1,rtest2);
-  */
- List<int> rtest1 = genIntList(6);
-  show(rtest1);
-  List<int> res(nullptr);
-  res=  padListZeros(rtest1,5);
-  cout << "showing res" << endl;
-  show(res);
 
-  
 
 
 
