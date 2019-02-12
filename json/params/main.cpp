@@ -6,6 +6,7 @@
 #include <curl/curl.h>
 #include <json/json.h>
 
+//"./params https://challenges.hackajob.co/swapi/api/people/?search=Luke%20Skywalker"
 namespace
 {
   std::size_t callback(
