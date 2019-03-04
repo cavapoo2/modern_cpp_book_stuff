@@ -20,7 +20,8 @@ void show(const Cont& c) {
 struct Data {
 	mii c;
 	int max;
-	mvi mv;
+//	mvi mv;
+	mii cn;
 
 };
 
@@ -31,6 +32,7 @@ void showData(const Data& d){
 	for(auto const& [key,val] : d.c){
 		cout << key << ":" << val << endl;
 	}
+	/*
 	cout << "divs vec" << endl;
 	for(auto const& [key,val] : d.mv){
 		cout << key << ":";
@@ -38,24 +40,33 @@ void showData(const Data& d){
 			cout << v << ",";
 		}
 		cout << endl;
+	}*/
+	cout << "cns:" << endl;
+	for(auto const& [key,val] : d.cn){
+		cout << key << ":" << val << endl;
 	}
+
 }
 
 Data initMapSet(vi & A){
 	int max=0;
 	mii c;
-	mvi mv;
+	//mvi mv;
+	mii cn;
 	for(auto v : A){
 		if(v > max)max = v;
-		if(mv.count(v) > 0) {
+		if(c.count(v) > 0) {
 			c[v]++;
+			cn[v]++;
 		}else {
 			c[v]=1;
+			cn[v]=1;
 		}
-		mv[v].push_back(v);
+//		mv[v].push_back(v);
 
 	}
-	Data res = {c,max,mv};
+	//Data res = {c,max,mv,cn};
+	Data res = {c,max,cn};
 	return res;
 
 }
@@ -67,11 +78,13 @@ Data divisors(Data& d){
 		int k = i*i;
 		while(k <= d.max) {
 			if(d.c.count(k) > 0 ) {
-				vi v(d.c[i],i); //init a vector of size and value
-				d.mv[k].insert(d.mv[k].end(),v.begin(),v.end());
+			//	vi v(d.c[i],i); //init a vector of size and value
+			//	d.mv[k].insert(d.mv[k].end(),v.begin(),v.end());
+				d.cn[k]+= d.c[i];
 				if(d.c.count(k/i) > 0 && (i != k/i)){
-					vi v1(d.c[k/i],k/i);
-					d.mv[k].insert(d.mv[k].end(),v1.begin(),v1.end());
+				//	vi v1(d.c[k/i],k/i);
+				//	d.mv[k].insert(d.mv[k].end(),v1.begin(),v1.end());
+					d.cn[k]+= d.c[k/i];
 				}
 			}
 			k+=i;
@@ -101,14 +114,15 @@ vi solutionSlow(vi& A){
 //still 0.1 ms too slow - needs optimizing
 vector<int> solution(vector<int>& vec){
 	Data d = initMapSet(vec);
-	//showData(d);
+//	showData(d);
 	d= divisors(d);
-	//showData(d);
+//	showData(d);
 	vi res;
 	int ones = d.c.count(1) > 0 ? d.c[1] : 0;
 	int N = vec.size();
 	for(auto v : vec){
-		int count = N - ones -  ((v != 1) ? d.mv[v].size() : 0);
+		//int count = N - ones -  ((v != 1) ? d.mv[v].size() : 0);
+		int count = N - ones -  ((v != 1) ? d.cn[v] : 0);
 		res.push_back(count);
 	}
 	return res;
@@ -126,6 +140,7 @@ int main(int arg, char* argv[])
 		 cout << "final" << endl;
 		 showData(d);
 		 cout << "res" << endl;*/
+	cout << "test {3,1,2,3,6}" << endl;
 	vi res = solution(test);
 	cout << "input {3,1,2,3,6}" << endl;
 	show(res);
