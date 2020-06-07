@@ -1,93 +1,99 @@
-#include <iostream>
-#include<vector>
-#include<numeric>
-#include<string>
-#include<algorithm>
+#include "table.h"
+namespace UTILS {
 
-using namespace std;
+	using namespace std;
 
-using MatrixS = std::vector<std::vector<std::string>>;
-using RowS = std::vector<std::string>;
-using RowI = std::vector<size_t>;
-
-//get the Length of each item in the string row
-vector<size_t> lengths(const vector<string>& row)
-{
-	vector<size_t> res;
-	auto getLength =[](const std::string& s) {
-		return s.length();
-	};
-	std::transform(row.cbegin(),row.cend(),std::back_inserter(res), getLength);
-	return res;
-
-}
-//compare current row widths with the current widths, updating it if necessary to get max
-vector<size_t> getMax(const vector<size_t>& currentMax,const vector<string>& row)
-{
-	vector<size_t> res;
-	vector<size_t> rowi = lengths(row); //convert to integers
-	auto maxv = [](const size_t a,const size_t r){
-		return std::max(a,r);
-	};
-	std::transform(currentMax.cbegin(),currentMax.cend(),rowi.cbegin(),std::back_inserter(res),maxv);
-	return res;
-}
-//get the max widths of each column
-RowI maxWidths(const vector<string>& header, const MatrixS& rows)
-{
-	vector<size_t> acc = lengths(header);
-	for(const auto& row : rows)
+	//get the Length of each item in the string row
+	vector<size_t> lengths(const vector<string>& row)
 	{
-		acc = getMax(acc,row);
+		vector<size_t> res;
+		auto getLength =[](const std::string& s) {
+			return s.length();
+		};
+		std::transform(row.cbegin(),row.cend(),std::back_inserter(res), getLength);
+		return res;
+
 	}
-	return acc;
-
-}
-
-string renderSeparator(const vector<size_t>& widths)
-{
-	auto rep = [](size_t w )
+	//compare current col widths, updating if necessary to get max col width 
+	vector<size_t> getMax(const vector<size_t>& currentMax,const vector<string>& row)
 	{
-		return std::string(w+2,'-');
-	};
-	vector<string> pieces;
-	std::transform(widths.cbegin(),widths.cend(),std::back_inserter(pieces), rep);
-
-	string part = std::accumulate(pieces.begin(), pieces.end(), string(),
-			[](string &ss, string &s)
-			{
-			return ss.empty() ? s : ss + "+" + s;
-			});
-
-	return "|" + part + "|";
-
-}
-
-	template<typename T>
-void print(const T& container)
-{
-	for(const auto& v : container)
-	{
-		cout << v << " ";
+		vector<size_t> res;
+		vector<size_t> rowi = lengths(row); //convert to integers
+		auto maxv = [](const size_t a,const size_t r){
+			return std::max(a,r);
+		};
+		std::transform(currentMax.cbegin(),currentMax.cend(),rowi.cbegin(),std::back_inserter(res),maxv);
+		return res;
 	}
-	cout << "\n";
-}
-int main(int argc, char** argv)
-{
-	MatrixS rows = {{"Lisp","John Mac","1958"},
-		{"C","Dennis Ritch", "1969"},
-		{"ML","Robin Milner","1973"},
-		{"Ocaml","Xavier Leroy","1996"}};
-	vector<string> header = {"language","architect","first release"};
+	//get the max widths of each column
+	vector<size_t> maxWidths(const vector<string>& header, const MatrixS& rows)
+	{
+		vector<size_t> acc = lengths(header);
+		for(const auto& row : rows)
+		{
+			acc = getMax(acc,row);
+		}
+		return acc;
 
-	vector<size_t> widths = maxWidths(header,rows);
-	print(widths);
-	//	print(lengths(header));
-	string rend = renderSeparator(widths);
-	cout << rend << endl;
+	}
+	//create a seperator between the table header and table rows
+	string renderSeparator(const vector<size_t>& widths)
+	{
+		auto rep = [](size_t w )
+		{
+			return std::string(w+2,'-');
+		};
+		vector<string> pieces;
+		std::transform(widths.cbegin(),widths.cend(),std::back_inserter(pieces), rep);
 
+		string part = std::accumulate(pieces.begin(), pieces.end(), string(),
+				[](string &ss, string &s)
+				{
+				return ss.empty() ? s : ss + "+" + s;
+				});
 
+		return "|" + part + "|";
 
-	return 0;
+	}
+	//pads each columns item with appropriate number of spaces
+	string pad(const string& str, size_t length)
+	{
+		string res = " ";
+		string endSpace(length - str.length() +1,' ');
+		return res + str + endSpace;
+	}
 
+	//create each table row
+	string renderRow(vector<string>& row , vector<size_t>& widths)
+	{
+		auto padded = [](const string& item, size_t w) {
+			return  pad(item,w) + "|" ;
+		};
+		vector<string> str;
+		std::transform(row.cbegin(),row.cend(),widths.cbegin(),back_inserter(str),padded);
+
+		string part = std::accumulate(str.begin(), str.end(), string(),
+				[](string &ss, string &s)
+				{
+				return ss.empty() ? s : ss + s;
+				});
+
+		return "|" + part ;
+
+	}
+
+	//render the table
+	string renderTable(vector<string>& header, const MatrixS& rows)
+	{
+		vector<size_t> widths = maxWidths(header,rows);
+		string res = renderRow(header,widths);
+		res += "\n" + renderSeparator(widths) + "\n";
+		for(vector<string> row : rows)
+		{
+			string rr = renderRow(row,widths);
+			res += rr + "\n";
+		}
+		return res;
+
+	}
 }
